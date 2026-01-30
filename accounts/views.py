@@ -19,19 +19,23 @@ def signup(request):
         user.otp_created_at = timezone.now()
         user.save()
 
-        # SEND OTP EMAIL
-        send_mail(
-            'Your OTP Code',
-            f'Your OTP is {otp}. It is valid for 5 minutes.',
-            settings.EMAIL_HOST_USER,
-            [email],
-            fail_silently=False,
-        )
+        # SEND OTP EMAIL (SAFE)
+        try:
+            send_mail(
+                'Your OTP Code',
+                f'Your OTP is {otp}. It is valid for 5 minutes.',
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=True,
+            )
+        except Exception as e:
+            print("Email sending failed:", e)
 
         request.session['email'] = email
         return redirect('verify_otp')
 
     return render(request, "signup.html")
+
 
 
 def verify_otp(request):
